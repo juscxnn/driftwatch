@@ -59,6 +59,7 @@ export async function loadInbox(
   }
 
   const allowedProjectIds = projects.map((p) => p.id);
+  const projectCount = projects.length;
   const projectNameById = new Map(projects.map((p) => [p.id, p.name]));
 
   const { data: driftRows, error: driftsErr } = await sb
@@ -113,6 +114,7 @@ export async function loadInbox(
   return {
     drifts,
     total_pending: totalPending ?? 0,
+    project_count: projectCount,
     last_run_at: lastRun?.started_at ?? null,
     last_run_status: lastRun?.finished_at ? lastRun.status : null,
   };
@@ -122,6 +124,7 @@ function emptyInbox(): InboxResponse {
   return {
     drifts: [],
     total_pending: 0,
+    project_count: 0,
     last_run_at: null,
     last_run_status: null,
   };

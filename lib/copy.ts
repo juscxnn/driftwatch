@@ -72,6 +72,10 @@ export const COPY = {
     },
     emptyTitle: 'No drift detected.',
     emptyBody: 'Your RAG is behaving. We will email you when something changes.',
+    noProjectsTitle: 'Watch your first RAG system.',
+    noProjectsBody:
+      'Create a project, point it at your RAG endpoint, and add a handful of golden Q&As. We will run them on a schedule and flag drift.',
+    noProjectsCta: 'Create your first project',
     expectedLabel: 'Expected',
     actualLabel: 'Actual',
     reasoningLabel: 'Why the judge scored this',

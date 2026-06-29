@@ -121,6 +121,7 @@ export type InboxDrift = {
 export type InboxResponse = {
   drifts: InboxDrift[];
   total_pending: number;
+  project_count: number;
   last_run_at: ISODateString | null;
   last_run_status: RunStatus | null;
 };

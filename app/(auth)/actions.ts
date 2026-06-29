@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { friendlyAuthError } from '@/lib/auth-errors';
 
 /**
  * Signs the current user out. The browser Supabase client also calls
@@ -167,18 +168,4 @@ export async function loginAction(formData: FormData): Promise<LoginResult> {
   }
   revalidatePath('/', 'layout');
   redirect('/');
-}
-
-export function friendlyAuthError(raw: string): string {
-  const lower = raw.toLowerCase();
-  if (lower.includes('invalid login') || lower.includes('invalid credentials')) {
-    return 'Wrong email or password. Please try again.';
-  }
-  if (lower.includes('already registered') || lower.includes('already been registered')) {
-    return 'An account with that email already exists. Try signing in.';
-  }
-  if (lower.includes('password') && lower.includes('at least')) {
-    return raw;
-  }
-  return 'Something went wrong. Please try again.';
 }

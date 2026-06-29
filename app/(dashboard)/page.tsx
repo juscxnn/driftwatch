@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { getSupabaseServer, getSession } from '@/lib/supabase/server';
 import { loadInbox } from '@/lib/inbox';
 import { OnboardingForm } from './onboarding-form';
@@ -11,16 +12,32 @@ export const runtime = 'nodejs';
 
 function HealthyDot() {
   return (
-    <span
+    <span aria-hidden className="inline-block h-2 w-2 rounded-full bg-brand" />
+  );
+}
+
+function ArrowRight() {
+  return (
+    <svg
       aria-hidden
-      className="inline-block h-2 w-2 rounded-full bg-brand"
-    />
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 7h8" />
+      <path d="M8 4l3 3-3 3" />
+    </svg>
   );
 }
 
 export default async function DashboardHome() {
   const session = await getSession();
-  if (!session) return null; // layout redirects to /login
+  if (!session) return null;
 
   const sb = await getSupabaseServer();
   const { data: membership } = await sb
@@ -54,7 +71,18 @@ export default async function DashboardHome() {
         ) : null}
       </header>
 
-      {inbox.drifts.length === 0 ? (
+      {inbox.project_count === 0 ? (
+        <EmptyState
+          title={COPY.inbox.noProjectsTitle}
+          body={COPY.inbox.noProjectsBody}
+          action={
+            <Link href="/projects" className="btn-primary">
+              {COPY.inbox.noProjectsCta}
+              <ArrowRight />
+            </Link>
+          }
+        />
+      ) : inbox.drifts.length === 0 ? (
         <EmptyState
           icon={<HealthyDot />}
           title={COPY.inbox.emptyTitle}

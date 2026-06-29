@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { friendlyAuthError } from './actions';
+import { friendlyAuthError } from '@/lib/auth-errors';
 
 describe('friendlyAuthError', () => {
   it('maps invalid login credentials to a friendly message', () => {
