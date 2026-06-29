@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getSupabaseServer } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 /**
  * Signs the current user out. The browser Supabase client also calls
@@ -22,6 +23,11 @@ export async function signOutAction(): Promise<void> {
  *
  * On success: redirects to the dashboard home. On error: returns the
  * error so the form can display it.
+ *
+ * The org and org_members inserts run through the service-role admin
+ * client because the user-scoped client cannot insert under our RLS
+ * policies (they are SELECT-only during this bootstrap path). The
+ * admin client is server-only and never exposed to the browser.
  */
 export type SignupResult =
   | { ok: true }
@@ -49,8 +55,9 @@ export async function signupAction(formData: FormData): Promise<SignupResult> {
     return { ok: false, error: 'Account created but no user was returned. Try signing in.' };
   }
 
-  // Create the organization.
-  const { data: org, error: orgErr } = await sb
+  // Bootstrap organization + membership with the admin client to bypass RLS.
+  const admin = createAdminClient();
+  const { data: org, error: orgErr } = await admin
     .from('organizations')
     .insert({ name: orgName })
     .select('id')
@@ -62,8 +69,7 @@ export async function signupAction(formData: FormData): Promise<SignupResult> {
     };
   }
 
-  // Link user as owner.
-  const { error: memberErr } = await sb
+  const { error: memberErr } = await admin
     .from('org_members')
     .insert({ org_id: org.id, user_id: userId, role: 'owner' });
   if (memberErr) {
