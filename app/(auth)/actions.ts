@@ -121,6 +121,8 @@ export async function setupOrgAction(formData: FormData): Promise<SetupOrgResult
   const { data: userData } = await sb.auth.getUser();
   const userId = userData.user?.id;
   if (!userId) {
+    // eslint-disable-next-line no-console
+    console.error('[setupOrgAction] no session user — cookies missing or invalid');
     return { ok: false, error: 'You need to sign in to set up an organization.' };
   }
 
@@ -132,6 +134,8 @@ export async function setupOrgAction(formData: FormData): Promise<SetupOrgResult
     .select('id')
     .single();
   if (orgErr || !org) {
+    // eslint-disable-next-line no-console
+    console.error('[setupOrgAction] organizations insert failed:', orgErr);
     return {
       ok: false,
       error: orgErr?.message ?? 'Could not create the organization. Please try again.',
@@ -142,9 +146,16 @@ export async function setupOrgAction(formData: FormData): Promise<SetupOrgResult
     .from('org_members')
     .insert({ org_id: org.id, user_id: userId, role: 'owner' });
   if (memberErr) {
-    return { ok: false, error: memberErr.message };
+    // eslint-disable-next-line no-console
+    console.error('[setupOrgAction] org_members insert failed:', memberErr);
+    return {
+      ok: false,
+      error: `${memberErr.message} — this usually means the org_members row already exists for this user, or RLS is blocking the insert.`,
+    };
   }
 
+  // eslint-disable-next-line no-console
+  console.log('[setupOrgAction] success:', { orgId: org.id, userId });
   revalidatePath('/', 'layout');
   redirect('/');
 }

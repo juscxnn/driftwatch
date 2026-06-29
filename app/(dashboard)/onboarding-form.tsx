@@ -22,9 +22,22 @@ export function OnboardingForm() {
     fd.set('orgName', orgName.trim());
 
     startTransition(async () => {
-      const result = await setupOrgAction(fd);
-      if (result && !result.ok) {
-        setError(result.error);
+      try {
+        const result = await setupOrgAction(fd);
+        if (result && !result.ok) {
+          // eslint-disable-next-line no-console
+          console.error('[onboarding] setupOrgAction failed:', result.error);
+          setError(result.error);
+        }
+        // success path: action calls redirect('/'), so we never reach here
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error('[onboarding] setupOrgAction threw:', err);
+        setError(
+          err instanceof Error
+            ? `Unexpected error: ${err.message}`
+            : 'Unexpected error. Check the browser console for details.',
+        );
       }
     });
   }
