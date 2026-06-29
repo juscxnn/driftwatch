@@ -60,10 +60,10 @@ function TriageItem({ row }: { row: TriageRow }) {
     <li className="px-4 py-3">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2 text-xs text-textMuted">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-text-muted">
             <Link
               href={`/runs/${row.run_id}`}
-              className="font-medium text-brand hover:underline"
+              className="font-medium text-brand hover:text-brand-hover hover:underline"
             >
               View run
             </Link>
@@ -71,16 +71,16 @@ function TriageItem({ row }: { row: TriageRow }) {
             <span>{formatRelative(row.created_at)}</span>
           </div>
           <div className="mt-1 font-medium text-text">{row.question}</div>
-          <div className="mt-1 line-clamp-2 text-sm text-textMuted">
+          <div className="mt-1 line-clamp-2 text-sm text-text-muted">
             Expected: {row.expected_answer}
           </div>
           {row.actual_answer ? (
-            <div className="mt-1 line-clamp-2 text-sm text-textMuted">
+            <div className="mt-1 line-clamp-2 text-sm text-text-muted">
               Actual: {row.actual_answer}
             </div>
           ) : null}
           {row.judge_reasoning ? (
-            <p className="mt-2 text-sm italic text-textMuted">
+            <p className="mt-2 text-sm italic text-text-muted">
               “{row.judge_reasoning}”
             </p>
           ) : null}

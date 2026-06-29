@@ -9,18 +9,18 @@ type Status =
 
 const STYLES: Record<string, string> = {
   // run statuses
-  running: 'bg-amber-100 text-amber-800 border-amber-200',
-  completed: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-  failed: 'bg-rose-100 text-rose-800 border-rose-200',
+  running: 'bg-warn-muted text-warn',
+  completed: 'bg-success-muted text-success',
+  failed: 'bg-danger-muted text-danger',
   // review
-  pending: 'bg-amber-100 text-amber-800 border-amber-200',
-  approved: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-  reverted: 'bg-rose-100 text-rose-800 border-rose-200',
-  accepted: 'bg-sky-100 text-sky-800 border-sky-200',
+  pending: 'bg-warn-muted text-warn',
+  approved: 'bg-success-muted text-success',
+  reverted: 'bg-danger-muted text-danger',
+  accepted: 'bg-surface-muted text-text-muted',
   // pass/fail
-  pass: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-  fail: 'bg-rose-100 text-rose-800 border-rose-200',
-  neutral: 'bg-zinc-100 text-zinc-700 border-zinc-200',
+  pass: 'bg-success-muted text-success',
+  fail: 'bg-danger-muted text-danger',
+  neutral: 'bg-surface-muted text-text-muted',
 };
 
 function labelFor(s: Status): string {
@@ -54,7 +54,7 @@ function styleFor(s: Status): string {
 export function StatusBadge(props: Status) {
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${styleFor(
+      className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${styleFor(
         props,
       )}`}
     >

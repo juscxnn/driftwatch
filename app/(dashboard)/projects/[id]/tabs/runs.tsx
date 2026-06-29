@@ -36,7 +36,7 @@ export function RunsTab({ projectId, items }: RunsTabProps) {
       ) : (
         <div className="card overflow-hidden p-0">
           <table className="w-full text-sm">
-            <thead className="bg-surfaceMuted text-left text-textMuted">
+            <thead className="bg-surface-muted text-left text-text-muted">
               <tr>
                 <th className="px-4 py-2 font-medium">{COPY.runs.columns.started}</th>
                 <th className="px-4 py-2 font-medium">{COPY.runs.columns.status}</th>
@@ -50,18 +50,18 @@ export function RunsTab({ projectId, items }: RunsTabProps) {
             <tbody>
               {items.map((run) => (
                 <tr key={run.id} className="border-t border-border">
-                  <td className="px-4 py-3 text-textMuted">{formatDate(run.started_at)}</td>
+                  <td className="px-4 py-3 text-text-muted">{formatDate(run.started_at)}</td>
                   <td className="px-4 py-3">
                     <StatusBadge kind="run" value={run.status} />
                   </td>
                   <td className="px-4 py-3">{run.total}</td>
-                  <td className="px-4 py-3 text-emerald-700">{run.passed}</td>
-                  <td className="px-4 py-3 text-rose-700">{run.failed}</td>
-                  <td className="px-4 py-3 text-textMuted">{run.triggered_by}</td>
+                  <td className="px-4 py-3 text-success">{run.passed}</td>
+                  <td className="px-4 py-3 text-danger">{run.failed}</td>
+                  <td className="px-4 py-3 text-text-muted">{run.triggered_by}</td>
                   <td className="px-4 py-3 text-right">
                     <Link
                       href={`/runs/${run.id}`}
-                      className="text-brand hover:underline"
+                      className="text-brand hover:text-brand-hover hover:underline"
                     >
                       {COPY.projects.rowAction}
                     </Link>

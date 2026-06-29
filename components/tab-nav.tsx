@@ -49,12 +49,12 @@ export function TabNav({ tabs, basePath, paramName = 'tab' }: TabNavProps) {
             className={`relative -mb-px flex items-center gap-2 border-b-2 px-3 py-2 text-sm font-medium transition ${
               showActive
                 ? 'border-brand text-text'
-                : 'border-transparent text-textMuted hover:text-text'
+                : 'border-transparent text-text-muted hover:text-text'
             }`}
           >
             {tab.label}
             {tab.badge && tab.badge > 0 ? (
-              <span className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-rose-600 px-1.5 text-[10px] font-semibold leading-5 text-white">
+              <span className="inline-flex min-w-[1.25rem] items-center justify-center rounded-md bg-danger-muted px-1.5 text-[10px] font-medium leading-5 text-danger">
                 {tab.badge > 99 ? '99+' : tab.badge}
               </span>
             ) : null}

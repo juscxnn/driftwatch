@@ -73,7 +73,7 @@ export function NewProjectForm() {
 
   return (
     <form onSubmit={handleSubmit} className="card space-y-3" noValidate>
-      <h2 className="text-base font-semibold">{COPY.projects.newTitle}</h2>
+      <h2 className="text-base font-medium">{COPY.projects.newTitle}</h2>
 
       <div>
         <label htmlFor="name" className="label">

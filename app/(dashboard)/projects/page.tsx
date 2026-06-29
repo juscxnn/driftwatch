@@ -56,7 +56,7 @@ export default async function ProjectsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Projects</h1>
+          <h1 className="text-2xl font-medium tracking-tight">Projects</h1>
           <p className="muted">One project per RAG system you want to watch.</p>
         </div>
       </div>
@@ -71,7 +71,7 @@ export default async function ProjectsPage() {
       ) : (
         <div className="card overflow-hidden p-0">
           <table className="w-full text-sm">
-            <thead className="bg-surfaceMuted text-left text-textMuted">
+            <thead className="bg-surface-muted text-left text-text-muted">
               <tr>
                 <th className="px-4 py-2 font-medium">Name</th>
                 <th className="px-4 py-2 font-medium">RAG endpoint</th>
@@ -91,7 +91,7 @@ export default async function ProjectsPage() {
                       {project.name}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-textMuted">
+                  <td className="px-4 py-3 text-text-muted">
                     {project.rag_endpoint_url ?? '—'}
                   </td>
                   <td className="px-4 py-3">
@@ -112,7 +112,7 @@ export default async function ProjectsPage() {
                   <td className="px-4 py-3 text-right">
                     <Link
                       href={`/projects/${project.id}`}
-                      className="text-brand hover:underline"
+                      className="text-brand hover:text-brand-hover hover:underline"
                     >
                       {COPY.projects.rowAction}
                     </Link>

@@ -2,21 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Theme tokens — single clean light theme for v1. */
+/*
+ * Driftwatch design tokens — mid-dark, warm-neutral grey, single
+ * emerald accent. The accent means "healthy RAG" by default; the
+ * rare amber/rose states mean "drift" or "broken."
+ *
+ * Never use pure black or pure white. Always warm-neutral.
+ *
+ * See AGENTS.md "Design tokens" for the rationale + scale.
+ */
 :root {
-  --bg: #f7f7f8;
-  --surface: #ffffff;
-  --surface-muted: #f1f1f3;
-  --border: #e5e5e9;
-  --text: #18181b;
-  --text-muted: #6b7280;
-  --brand: #4f46e5;
-  --brand-hover: #4338ca;
-  --success: #16a34a;
-  --warn: #d97706;
-  --danger: #dc2626;
-  --pending: #d97706;
-  --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px var(--brand);
+  --bg: #0E0F11;
+  --surface: #17181B;
+  --surface-muted: #1D1F23;
+  --surface-elevated: #1D1F23;
+
+  --border: #26282E;
+  --border-strong: #34363C;
+
+  --text: #E8E9EB;
+  --text-muted: #8A8D94;
+  --text-subtle: #5C5F66;
+
+  --brand: #10B981;
+  --brand-hover: #34D399;
+  --brand-muted: #064E3B;
+
+  --success: #10B981;
+  --success-muted: #064E3B;
+
+  --warn: #F59E0B;
+  --warn-muted: #451A03;
+
+  --danger: #F43F5E;
+  --danger-muted: #4C0519;
+
+  --pending: #F59E0B;
+
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--brand);
+
+  --shadow-elevated: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 /* Minimal reset on top of Tailwind preflight. */
@@ -31,6 +56,12 @@ body {
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv11', 'ss01', 'ss03';
+}
+
+::selection {
+  background: var(--brand-muted);
+  color: var(--text);
 }
 
 a {
@@ -41,11 +72,12 @@ a {
 button {
   font-family: inherit;
   cursor: pointer;
+  font-weight: 500;
 }
 
 button:disabled {
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 input,
@@ -54,44 +86,78 @@ select {
   font-family: inherit;
   font-size: inherit;
   color: inherit;
+  background: transparent;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-subtle);
 }
 
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible,
-button:focus-visible {
+button:focus-visible,
+a:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
   border-radius: 6px;
 }
 
-/* Reusable component-like helpers (kept tiny — no shadcn). */
+/* Reusable component-like helpers. Same class names as before so the
+ * rest of the codebase keeps working; only the values changed. */
 @layer components {
   .card {
-    @apply rounded-xl border border-border bg-surface p-5 shadow-sm;
+    @apply rounded-md border border-border bg-surface p-6;
   }
   .btn {
-    @apply inline-flex items-center justify-center rounded-md px-3.5 py-2 text-sm font-medium transition;
+    @apply inline-flex items-center justify-center gap-2 rounded-md
+           px-3.5 h-9 text-sm font-medium tracking-tight
+           transition-colors duration-100 ease-out;
   }
   .btn-primary {
-    @apply btn bg-brand text-white hover:bg-brandHover;
+    @apply btn bg-brand text-bg hover:bg-brand-hover;
   }
   .btn-secondary {
-    @apply btn border border-border bg-surface text-text hover:bg-surfaceMuted;
+    @apply btn border border-border bg-surface text-text hover:bg-surface-muted;
+  }
+  .btn-ghost {
+    @apply btn text-text-muted hover:text-text hover:bg-surface-muted;
   }
   .btn-danger {
     @apply btn bg-danger text-white hover:opacity-90;
   }
   .input {
-    @apply block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm shadow-sm placeholder:text-textMuted;
+    @apply block w-full h-9 rounded-md border border-border bg-surface
+           px-3 text-sm text-text
+           placeholder:text-text-subtle
+           focus:border-border-strong;
+  }
+  .textarea {
+    @apply block w-full rounded-md border border-border bg-surface
+           px-3 py-2 text-sm text-text leading-relaxed
+           placeholder:text-text-subtle
+           focus:border-border-strong;
   }
   .label {
-    @apply mb-1 block text-sm font-medium text-text;
+    @apply mb-1.5 block text-xs font-medium tracking-wide uppercase text-text-muted;
   }
   .muted {
-    @apply text-sm text-textMuted;
+    @apply text-sm text-text-muted;
+  }
+  .subtle {
+    @apply text-xs text-text-subtle;
   }
   .error-text {
     @apply mt-1 text-sm text-danger;
   }
+  .hairline {
+    @apply border-border;
+  }
+}
+
+/* Mono numeric IDs, hashes, scores */
+.num {
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }

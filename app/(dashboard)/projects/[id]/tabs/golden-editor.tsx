@@ -64,8 +64,8 @@ function TabButton({
       onClick={onClick}
       className={`rounded-md px-3 py-1.5 text-sm font-medium ${
         active
-          ? 'bg-brand text-white'
-          : 'bg-surfaceMuted text-textMuted hover:text-text'
+          ? 'bg-brand text-bg'
+          : 'bg-surface-muted text-text-muted hover:text-text'
       }`}
     >
       {label}
@@ -244,7 +244,7 @@ function BulkImportForm({
         className="input min-h-[160px] font-mono text-xs"
       />
       {error ? <p className="error-text">{error}</p> : null}
-      {info ? <p className="text-sm text-emerald-700">{info}</p> : null}
+      {info ? <p className="text-sm text-success">{info}</p> : null}
       <button type="submit" className="btn-primary" disabled={isPending || !text.trim()}>
         {isPending ? 'Importing…' : COPY.golden.import}
       </button>

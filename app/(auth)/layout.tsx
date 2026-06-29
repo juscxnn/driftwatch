@@ -6,10 +6,10 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
     <div className="min-h-full">
       <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-12">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-brand text-white font-semibold">
+          <div className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-md bg-brand text-bg font-medium">
             R
           </div>
-          <h1 className="text-xl font-semibold tracking-tight">{COPY.brand}</h1>
+          <h1 className="text-xl font-medium tracking-tight">{COPY.brand}</h1>
           <p className="muted">{COPY.tagline}</p>
         </div>
         {children}

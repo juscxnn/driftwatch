@@ -63,7 +63,7 @@ export function GoldenRowActions({ item }: Props) {
       <div className="flex justify-end gap-2">
         <button
           type="button"
-          className="text-sm font-medium text-brand hover:underline disabled:opacity-50"
+          className="text-sm font-medium text-brand hover:text-brand-hover hover:underline disabled:opacity-50"
           onClick={() => setEditing(true)}
           disabled={isPending}
         >
@@ -85,7 +85,7 @@ export function GoldenRowActions({ item }: Props) {
   return (
     <form
       onSubmit={handleSave}
-      className="grid grid-cols-1 gap-3 bg-surfaceMuted/60 p-3 rounded-md"
+      className="grid grid-cols-1 gap-3 bg-surface-muted p-3 rounded-md"
       noValidate
     >
       <div>

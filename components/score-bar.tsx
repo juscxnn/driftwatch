@@ -17,7 +17,7 @@ export function ScoreBar({ score, threshold = 0.7, reasoning }: ScoreBarProps) {
   }
   const value = clamp01(score);
   const passed = value >= threshold;
-  const barColor = passed ? 'bg-emerald-500' : 'bg-rose-500';
+  const barColor = passed ? 'bg-brand' : 'bg-danger';
   const thresholdPct = clamp01(threshold) * 100;
 
   const tooltip = reasoning
@@ -26,19 +26,19 @@ export function ScoreBar({ score, threshold = 0.7, reasoning }: ScoreBarProps) {
 
   return (
     <div className="flex items-center gap-2 min-w-[140px]" title={tooltip}>
-      <div className="relative h-2 flex-1 rounded-full bg-surfaceMuted overflow-hidden">
+      <div className="relative h-2 flex-1 rounded-full bg-surface-muted overflow-hidden">
         <div
           className={`absolute inset-y-0 left-0 ${barColor}`}
           style={{ width: `${value * 100}%` }}
           aria-hidden
         />
         <div
-          className="absolute inset-y-[-2px] w-px bg-text/40"
+          className="absolute inset-y-[-2px] w-px bg-text-subtle"
           style={{ left: `${thresholdPct}%` }}
           aria-hidden
         />
       </div>
-      <span className="w-10 text-right text-xs font-mono text-text">
+      <span className="w-10 text-right text-xs num text-text">
         {value.toFixed(2)}
       </span>
     </div>

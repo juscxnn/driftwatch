@@ -38,7 +38,7 @@ export function OverviewTab({ project, runs, sources, pendingCount }: OverviewTa
         <StatCard
           label={COPY.overview.passRate}
           value={
-            <span className="text-2xl font-semibold">
+            <span className="text-2xl font-medium">
               {totalCount > 0 ? formatPercent(totalPassed, totalCount) : '—'}
             </span>
           }
@@ -52,8 +52,8 @@ export function OverviewTab({ project, runs, sources, pendingCount }: OverviewTa
           label={COPY.overview.pendingReviews}
           value={
             <span
-              className={`text-2xl font-semibold ${
-                pendingCount > 0 ? 'text-rose-600' : 'text-text'
+              className={`text-2xl font-medium ${
+                pendingCount > 0 ? 'text-danger' : 'text-text'
               }`}
             >
               {pendingCount}
@@ -64,8 +64,8 @@ export function OverviewTab({ project, runs, sources, pendingCount }: OverviewTa
           label={COPY.overview.sourcesHealth}
           value={
             <span
-              className={`text-2xl font-semibold ${
-                sourcesOk ? 'text-emerald-600' : 'text-amber-600'
+              className={`text-2xl font-medium ${
+                sourcesOk ? 'text-success' : 'text-warn'
               }`}
             >
               {sources.length === 0 ? '—' : `${sourcesFetched}/${sources.length}`}
@@ -77,7 +77,7 @@ export function OverviewTab({ project, runs, sources, pendingCount }: OverviewTa
 
       <div className="card">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold">Pass rate trend</h2>
+          <h2 className="text-base font-medium">Pass rate trend</h2>
           <span className="muted">Last {runs.length || 0} runs</span>
         </div>
         <div className="mt-3">
@@ -96,26 +96,26 @@ export function OverviewTab({ project, runs, sources, pendingCount }: OverviewTa
       </div>
 
       <div className="card">
-        <h2 className="text-base font-semibold">Project</h2>
+        <h2 className="text-base font-medium">Project</h2>
         <dl className="mt-3 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
           <div>
-            <dt className="text-textMuted">RAG endpoint</dt>
-            <dd className="break-all font-mono">
+            <dt className="text-text-muted">RAG endpoint</dt>
+            <dd className="break-all num">
               {project.rag_endpoint_url ?? '—'}
             </dd>
           </div>
           <div>
-            <dt className="text-textMuted">Pass threshold</dt>
-            <dd>{project.pass_threshold}</dd>
+            <dt className="text-text-muted">Pass threshold</dt>
+            <dd className="num">{project.pass_threshold}</dd>
           </div>
           <div>
-            <dt className="text-textMuted">LLM provider</dt>
+            <dt className="text-text-muted">LLM provider</dt>
             <dd>
               {project.llm_provider} · {project.llm_model}
             </dd>
           </div>
           <div>
-            <dt className="text-textMuted">Judge</dt>
+            <dt className="text-text-muted">Judge</dt>
             <dd>
               {project.judge_provider} · {project.judge_model}
             </dd>
@@ -137,11 +137,11 @@ function StatCard({
 }) {
   return (
     <div className="card">
-      <p className="text-xs font-medium uppercase tracking-wide text-textMuted">
+      <p className="text-xs font-medium uppercase tracking-wide text-text-muted">
         {label}
       </p>
       <div className="mt-2">{value}</div>
-      {sub ? <p className="mt-1 text-xs text-textMuted">{sub}</p> : null}
+      {sub ? <p className="mt-1 text-xs text-text-muted">{sub}</p> : null}
     </div>
   );
 }

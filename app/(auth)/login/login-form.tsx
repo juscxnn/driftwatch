@@ -68,9 +68,9 @@ export function LoginForm() {
       <button type="submit" className="btn-primary w-full" disabled={isPending}>
         {isPending ? 'Signing in…' : COPY.auth.submitLogin}
       </button>
-      <p className="text-center text-sm text-textMuted md:hidden">
+      <p className="text-center text-sm text-text-muted md:hidden">
         {COPY.auth.switchToSignup.split('?')[0]}?{' '}
-        <Link href="/signup" className="font-medium text-brand hover:underline">
+        <Link href="/signup" className="font-medium text-brand hover:text-brand-hover hover:underline">
           {COPY.auth.switchToSignupCta}
         </Link>
       </p>

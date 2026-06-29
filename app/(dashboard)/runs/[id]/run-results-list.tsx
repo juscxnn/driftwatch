@@ -76,7 +76,7 @@ export function RunResultsList({ initial }: Props) {
                   <Field label="Actual" value={r.actual_answer ?? '—'} />
                 </div>
                 {r.judge_reasoning ? (
-                  <p className="mt-2 text-sm italic text-textMuted">
+                  <p className="mt-2 text-sm italic text-text-muted">
                     “{r.judge_reasoning}”
                   </p>
                 ) : null}
@@ -124,7 +124,7 @@ export function RunResultsList({ initial }: Props) {
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-xs font-medium uppercase tracking-wide text-textMuted">
+      <div className="text-xs font-medium uppercase tracking-wide text-text-muted">
         {label}
       </div>
       <div className="mt-1 whitespace-pre-wrap text-text">{value}</div>

@@ -169,7 +169,7 @@ export async function loginAction(formData: FormData): Promise<LoginResult> {
   redirect('/');
 }
 
-function friendlyAuthError(raw: string): string {
+export function friendlyAuthError(raw: string): string {
   const lower = raw.toLowerCase();
   if (lower.includes('invalid login') || lower.includes('invalid credentials')) {
     return 'Wrong email or password. Please try again.';

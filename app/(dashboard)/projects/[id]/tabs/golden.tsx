@@ -57,7 +57,7 @@ function GoldenItemRow({ item }: { item: GoldenQA }) {
           onClick={() => setExpanded((v) => !v)}
         >
           <div className="font-medium text-text">{item.question}</div>
-          <div className="mt-1 line-clamp-2 text-sm text-textMuted">
+          <div className="mt-1 line-clamp-2 text-sm text-text-muted">
             {item.expected_answer}
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
@@ -66,7 +66,7 @@ function GoldenItemRow({ item }: { item: GoldenQA }) {
                 {item.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="rounded-full bg-surfaceMuted px-2 py-0.5"
+                    className="rounded-md bg-surface-muted px-2 py-0.5 text-text-muted"
                   >
                     {tag}
                   </span>
@@ -74,10 +74,10 @@ function GoldenItemRow({ item }: { item: GoldenQA }) {
               </span>
             ) : null}
             <span
-              className={`rounded-full px-2 py-0.5 font-medium ${
+              className={`rounded-md px-2 py-0.5 font-medium ${
                 item.active
-                  ? 'bg-emerald-100 text-emerald-800'
-                  : 'bg-zinc-100 text-zinc-700'
+                  ? 'bg-success-muted text-success'
+                  : 'bg-surface-muted text-text-muted'
               }`}
             >
               {item.active ? 'Active' : 'Inactive'}
@@ -117,7 +117,7 @@ function Detail({
 }) {
   return (
     <div className={className}>
-      <div className="text-xs font-medium uppercase tracking-wide text-textMuted">
+      <div className="text-xs font-medium uppercase tracking-wide text-text-muted">
         {label}
       </div>
       <div className="mt-1 whitespace-pre-wrap text-text">{value}</div>

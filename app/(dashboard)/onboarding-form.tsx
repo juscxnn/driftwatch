@@ -31,7 +31,7 @@ export function OnboardingForm() {
 
   return (
     <div className="card mx-auto max-w-md">
-      <h2 className="text-lg font-semibold tracking-tight">
+      <h2 className="text-lg font-medium tracking-tight">
         {COPY.onboarding.title}
       </h2>
       <p className="muted mt-1">{COPY.onboarding.body}</p>

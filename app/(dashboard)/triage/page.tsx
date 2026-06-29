@@ -62,7 +62,7 @@ export default async function OrgTriagePage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="text-2xl font-medium tracking-tight">
           {COPY.triage.title}
         </h1>
         <p className="muted">{COPY.triage.subtitle}</p>

@@ -96,3 +96,31 @@ export type TriagePatch = {
 export type OrgTriageSummary = {
   pending_count: number;
 };
+
+/**
+ * A single drifted/pending review item as shown in the inbox.
+ * Denormalized: includes the project name and run timestamp so the
+ * inbox row can render without further joins.
+ */
+export type InboxDrift = {
+  run_result_id: string;
+  run_id: string;
+  run_started_at: ISODateString;
+  project_id: string;
+  project_name: string;
+  question: string;
+  expected_answer: string;
+  actual_answer: string | null;
+  judge_score: number | null;
+  judge_reasoning: string | null;
+  latency_ms: number | null;
+  review_status: ReviewStatus;
+  created_at: ISODateString;
+};
+
+export type InboxResponse = {
+  drifts: InboxDrift[];
+  total_pending: number;
+  last_run_at: ISODateString | null;
+  last_run_status: RunStatus | null;
+};

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
 import { COPY } from '@/lib/copy';
 import { signOutAction } from '@/app/(auth)/actions';
@@ -45,7 +45,7 @@ export function Nav({
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-surface/90 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4">
-        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+        <Link href="/" className="flex items-center gap-2 font-medium tracking-tight">
           <span
             aria-hidden
             className="inline-block h-6 w-6 rounded-md bg-brand"
@@ -67,18 +67,18 @@ export function Nav({
 
         <div className="ml-auto flex items-center gap-3 text-sm">
           {orgName ? (
-            <span className="hidden text-textMuted sm:inline">
+            <span className="hidden text-text-muted sm:inline">
               {orgName}
             </span>
           ) : null}
           {email ? (
             <>
-              <span className="hidden text-textMuted sm:inline">{email}</span>
+              <span className="hidden text-text-muted sm:inline">{email}</span>
               <button
                 type="button"
                 onClick={handleSignOut}
                 disabled={isPending}
-                className="btn-secondary"
+                className="btn-ghost"
               >
                 {COPY.nav.signOut}
               </button>
@@ -100,10 +100,16 @@ export function Nav({
 }
 
 function NavLink({ href, label }: { href: string; label: string }) {
+  const pathname = usePathname();
+  const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href);
   return (
     <Link
       href={href}
-      className="rounded-md px-3 py-1.5 text-sm font-medium text-textMuted hover:bg-surfaceMuted hover:text-text"
+      className={`rounded-md px-3 py-1.5 text-sm font-medium ${
+        isActive
+          ? 'text-text bg-surface-muted'
+          : 'text-text-muted hover:text-text hover:bg-surface-muted'
+      }`}
     >
       {label}
     </Link>
@@ -119,14 +125,20 @@ function NavLinkWithBadge({
   label: string;
   count: number;
 }) {
+  const pathname = usePathname();
+  const isActive = pathname.startsWith(href);
   return (
     <Link
       href={href}
-      className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium text-textMuted hover:bg-surfaceMuted hover:text-text"
+      className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium ${
+        isActive
+          ? 'text-text bg-surface-muted'
+          : 'text-text-muted hover:text-text hover:bg-surface-muted'
+      }`}
     >
       {label}
       {count > 0 ? (
-        <span className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-rose-600 px-1.5 text-[10px] font-semibold leading-5 text-white">
+        <span className="inline-flex min-w-[1.25rem] items-center justify-center rounded-md bg-danger-muted px-1.5 text-[10px] font-medium leading-5 text-danger">
           {count > 99 ? '99+' : count}
         </span>
       ) : null}

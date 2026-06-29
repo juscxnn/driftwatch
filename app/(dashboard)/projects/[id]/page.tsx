@@ -177,7 +177,7 @@ export default async function ProjectDetailPage({ params, searchParams }: PagePr
             </Link>{' '}
             /
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight">{project.name}</h1>
+          <h1 className="text-2xl font-medium tracking-tight">{project.name}</h1>
           <p className="muted">
             {project.rag_endpoint_url ?? 'No RAG endpoint configured'}
           </p>

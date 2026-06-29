@@ -63,7 +63,7 @@ export default async function RunDetailPage({ params }: PageProps) {
         </div>
         <div className="mt-1 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Run</h1>
+            <h1 className="text-2xl font-medium tracking-tight">Run</h1>
             <p className="muted">
               {formatDate(runRow.started_at)} ·{' '}
               {runRow.triggered_by.replace('_', ' ')}
@@ -78,7 +78,7 @@ export default async function RunDetailPage({ params }: PageProps) {
           </div>
         </div>
         {runRow.error ? (
-          <p className="mt-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
+          <p className="mt-3 rounded-md border border-danger bg-danger-muted px-3 py-2 text-sm text-danger">
             {runRow.error}
           </p>
         ) : null}

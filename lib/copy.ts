@@ -57,6 +57,28 @@ export const COPY = {
     submitting: 'Creating…',
   },
 
+  inbox: {
+    title: 'Inbox',
+    subtitleEmpty: 'Your RAG is healthy.',
+    subtitleEmptyDetail: 'No drift detected.',
+    subtitleWithCount: (n: number) =>
+      n === 1 ? '1 answer drifted' : `${n} answers drifted`,
+    lastRun: (when: string) => `Last full run ${when}`,
+    runOk: (passed: number, total: number) => `${passed}/${total} passed`,
+    actions: {
+      approve: 'Approve',
+      reword: 'Reword Q',
+      escalate: 'Escalate',
+    },
+    emptyTitle: 'No drift detected.',
+    emptyBody: 'Your RAG is behaving. We will email you when something changes.',
+    expectedLabel: 'Expected',
+    actualLabel: 'Actual',
+    reasoningLabel: 'Why the judge scored this',
+    scoreLabel: 'Score',
+    latencyLabel: 'Latency',
+  },
+
   projects: {
     newTitle: 'New project',
     fields: {

@@ -1,7 +1,7 @@
 // Tiny formatting helpers — kept here so dates and numbers stay consistent
 // across pages. We deliberately avoid pulling in date-fns for v1.
 
-export function formatDate(iso: string | null | undefined): string {
+export function formatDate(iso: string | Date | null | undefined): string {
   if (!iso) return '—';
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '—';
@@ -14,7 +14,7 @@ export function formatDate(iso: string | null | undefined): string {
   });
 }
 
-export function formatRelative(iso: string | null | undefined): string {
+export function formatRelative(iso: string | Date | null | undefined): string {
   if (!iso) return '—';
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '—';

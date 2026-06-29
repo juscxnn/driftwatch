@@ -7,22 +7,29 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // theme tokens — see app/globals.css
+        // Tokens — see app/globals.css
         bg: 'var(--bg)',
         surface: 'var(--surface)',
-        surfaceMuted: 'var(--surface-muted)',
+        'surface-muted': 'var(--surface-muted)',
+        'surface-elevated': 'var(--surface-elevated)',
         border: 'var(--border)',
+        'border-strong': 'var(--border-strong)',
         text: 'var(--text)',
-        textMuted: 'var(--text-muted)',
+        'text-muted': 'var(--text-muted)',
+        'text-subtle': 'var(--text-subtle)',
         brand: 'var(--brand)',
-        brandHover: 'var(--brand-hover)',
+        'brand-hover': 'var(--brand-hover)',
+        'brand-muted': 'var(--brand-muted)',
         success: 'var(--success)',
+        'success-muted': 'var(--success-muted)',
         warn: 'var(--warn)',
+        'warn-muted': 'var(--warn-muted)',
         danger: 'var(--danger)',
-        pending: 'var(--pending)',
+        'danger-muted': 'var(--danger-muted)',
       },
       fontFamily: {
         sans: [
+          'Inter',
           'ui-sans-serif',
           'system-ui',
           '-apple-system',
@@ -34,6 +41,7 @@ module.exports = {
           'sans-serif',
         ],
         mono: [
+          'JetBrains Mono',
           'ui-monospace',
           'SFMono-Regular',
           'Menlo',
@@ -41,6 +49,25 @@ module.exports = {
           'Consolas',
           'monospace',
         ],
+      },
+      fontSize: {
+        '2xs': ['11px', { lineHeight: '14px' }],
+        xs: ['12px', { lineHeight: '16px' }],
+        sm: ['13px', { lineHeight: '18px' }],
+        base: ['14px', { lineHeight: '20px' }],
+        md: ['15px', { lineHeight: '22px' }],
+        lg: ['18px', { lineHeight: '24px' }],
+        xl: ['22px', { lineHeight: '28px' }],
+        '2xl': ['28px', { lineHeight: '34px' }],
+        '3xl': ['36px', { lineHeight: '40px', letterSpacing: '-0.02em' }],
+      },
+      borderRadius: {
+        sm: '4px',
+        md: '6px',
+        lg: '8px',
+      },
+      boxShadow: {
+        elevated: 'var(--shadow-elevated)',
       },
     },
   },

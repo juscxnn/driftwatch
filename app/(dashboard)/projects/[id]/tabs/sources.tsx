@@ -78,7 +78,7 @@ function SourceRow({ item }: { item: Source }) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="rounded-md bg-surfaceMuted px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-textMuted">
+            <span className="rounded-md bg-surface-muted px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-text-muted">
               {item.kind}
             </span>
             <div className="font-medium text-text">
@@ -89,18 +89,18 @@ function SourceRow({ item }: { item: Source }) {
             href={item.uri}
             target="_blank"
             rel="noreferrer"
-            className="mt-1 block break-all text-sm text-brand hover:underline"
+            className="mt-1 block break-all text-sm text-brand hover:text-brand-hover hover:underline"
           >
             {item.uri}
           </a>
-          <dl className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-textMuted">
+          <dl className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-muted">
             <div>
               <dt className="inline">{COPY.sources.columns.lastFetched}: </dt>
               <dd className="inline">{formatRelative(item.last_fetched_at)}</dd>
             </div>
             <div>
               <dt className="inline">{COPY.sources.columns.lastHash}: </dt>
-              <dd className="inline font-mono">{truncateHash(item.last_hash)}</dd>
+              <dd className="inline num">{truncateHash(item.last_hash)}</dd>
             </div>
           </dl>
           {error ? <p className="error-text mt-2">{error}</p> : null}
@@ -177,7 +177,7 @@ function AddSourceForm({ projectId }: { projectId: string }) {
 
   return (
     <form onSubmit={handleSubmit} className="card space-y-3" noValidate>
-      <h2 className="text-base font-semibold">{COPY.sources.addCta}</h2>
+      <h2 className="text-base font-medium">{COPY.sources.addCta}</h2>
       <div>
         <label className="label">{COPY.sources.form.titleLabel}</label>
         <input
