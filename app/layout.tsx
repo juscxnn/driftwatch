@@ -10,8 +10,20 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export const metadata = {
-  title: 'RAG Drift Watcher',
-  description: 'Watches your RAG and screams when it starts lying.',
+  title: 'Driftwatch',
+  description: 'Watches your RAG and emails you when it starts lying.',
+  icons: {
+    icon: [
+      {
+        url:
+          'data:image/svg+xml;utf8,' +
+          encodeURIComponent(
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#10B981"/><circle cx="16" cy="16" r="6" fill="#0E0F11"/></svg>'
+          ),
+        type: 'image/svg+xml',
+      },
+    ],
+  },
 };
 
 async function getNavContext(): Promise<{

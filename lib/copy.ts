@@ -76,6 +76,10 @@ export const COPY = {
     noProjectsBody:
       'Create a project, point it at your RAG endpoint, and add a handful of golden Q&As. We will run them on a schedule and flag drift.',
     noProjectsCta: 'Create your first project',
+    trySample: 'Try with sample data',
+    seeding: 'Seeding…',
+    seedFailedBody:
+      'Could not seed sample data. Please try again or create a project manually.',
     expectedLabel: 'Expected',
     actualLabel: 'Actual',
     reasoningLabel: 'Why the judge scored this',

@@ -3,6 +3,7 @@ import { getSupabaseServer, getSession } from '@/lib/supabase/server';
 import { loadInbox } from '@/lib/inbox';
 import { OnboardingForm } from './onboarding-form';
 import { DriftRow } from './inbox/drift-row';
+import { SeedSampleDataButton } from './inbox/seed-sample-data-button';
 import { EmptyState } from '@/components/empty-state';
 import { COPY } from '@/lib/copy';
 import { formatRelative } from '@/lib/format';
@@ -76,10 +77,13 @@ export default async function DashboardHome() {
           title={COPY.inbox.noProjectsTitle}
           body={COPY.inbox.noProjectsBody}
           action={
-            <Link href="/projects" className="btn-primary">
-              {COPY.inbox.noProjectsCta}
-              <ArrowRight />
-            </Link>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Link href="/projects" className="btn-primary">
+                {COPY.inbox.noProjectsCta}
+                <ArrowRight />
+              </Link>
+              <SeedSampleDataButton />
+            </div>
           }
         />
       ) : inbox.drifts.length === 0 ? (
