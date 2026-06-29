@@ -104,6 +104,13 @@ a:focus-visible {
   border-radius: 6px;
 }
 
+/* Hide the Vercel Preview Toolbar floating widget on preview deployments.
+ * It overlaps form buttons and intercepts clicks. The toolbar is purely
+ * a dev convenience — production deployments don't include it anyway. */
+vercel-toolbar {
+  display: none !important;
+}
+
 /* Reusable component-like helpers. Same class names as before so the
  * rest of the codebase keeps working; only the values changed. */
 @layer components {
