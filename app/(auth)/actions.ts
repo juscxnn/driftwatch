@@ -100,6 +100,54 @@ export async function signupAction(formData: FormData): Promise<SignupResult> {
   redirect('/');
 }
 
+/**
+ * Creates an organization for an authenticated user who is not yet linked
+ * to one (e.g. signed up before the bootstrap fix landed, or whose
+ * previous signup attempt failed mid-flight). Used by the inline
+ * onboarding form on the dashboard.
+ */
+export type SetupOrgResult =
+  | { ok: true }
+  | { ok: false; error: string };
+
+export async function setupOrgAction(formData: FormData): Promise<SetupOrgResult> {
+  const orgName = String(formData.get('orgName') ?? '').trim();
+  if (!orgName) {
+    return { ok: false, error: 'Please enter an organization name.' };
+  }
+
+  const sb = await getSupabaseServer();
+  const { data: userData } = await sb.auth.getUser();
+  const userId = userData.user?.id;
+  if (!userId) {
+    return { ok: false, error: 'You need to sign in to set up an organization.' };
+  }
+
+  // Use the admin client so RLS doesn't block the bootstrap inserts.
+  const admin = createAdminClient();
+  const { data: org, error: orgErr } = await admin
+    .from('organizations')
+    .insert({ name: orgName })
+    .select('id')
+    .single();
+  if (orgErr || !org) {
+    return {
+      ok: false,
+      error: orgErr?.message ?? 'Could not create the organization. Please try again.',
+    };
+  }
+
+  const { error: memberErr } = await admin
+    .from('org_members')
+    .insert({ org_id: org.id, user_id: userId, role: 'owner' });
+  if (memberErr) {
+    return { ok: false, error: memberErr.message };
+  }
+
+  revalidatePath('/', 'layout');
+  redirect('/');
+}
+
 export type LoginResult =
   | { ok: true }
   | { ok: false; error: string };

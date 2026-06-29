@@ -3,6 +3,7 @@ import { getSupabaseServer } from '@/lib/supabase/server';
 import { getSession } from '@/lib/supabase/server';
 import { StatusBadge } from '@/components/status-badge';
 import { EmptyState } from '@/components/empty-state';
+import { OnboardingForm } from './onboarding-form';
 import { COPY } from '@/lib/copy';
 import { formatRelative } from '@/lib/format';
 import type { Project, Run } from '@/lib/types';
@@ -70,12 +71,7 @@ export default async function DashboardHome() {
   const { orgId, projects, totalPending } = await loadDashboardData(session.user.id);
 
   if (!orgId) {
-    return (
-      <EmptyState
-        title="No organization yet"
-        body="Your account is not linked to an organization. Contact support@ragdrift.example."
-      />
-    );
+    return <OnboardingForm />;
   }
 
   return (

@@ -49,6 +49,14 @@ export const COPY = {
     },
   },
 
+  onboarding: {
+    title: 'Set up your organization',
+    body: 'Pick a name for your workspace. You can change it later.',
+    placeholder: 'Acme Inc.',
+    submit: 'Create organization',
+    submitting: 'Creating…',
+  },
+
   projects: {
     newTitle: 'New project',
     fields: {
