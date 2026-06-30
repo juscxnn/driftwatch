@@ -5,11 +5,29 @@ import { useState, useTransition, type ReactNode } from 'react';
 import type { InboxDrift } from '@/lib/types';
 import { COPY } from '@/lib/copy';
 import { formatLatency, formatRelative, formatScore } from '@/lib/format';
+import { toast } from '@/components/toast';
 import { triageRunResultAction } from './actions';
+import { RewordEditor } from './reword-editor';
 
 const THRESHOLD = 0.7;
 
-type DriftRowProps = { drift: InboxDrift };
+type DriftRowProps = {
+  drift: InboxDrift;
+  /** When true, apply the focused/selected visual treatment (subtle brand
+   * border + ring) — used by the keyboard-shortcut layer. */
+  selected?: boolean;
+  /** Notify the parent that the user clicked Reword so it can track which
+   * row is in reword mode (only one at a time). */
+  onRewordClick?: (runResultId: string) => void;
+  /** True when this row is the one in reword mode. When set, the row keeps
+   * the editor expanded below its content. */
+  rewordMode?: boolean;
+  /** Called after a triage action (approve / escalate) or a successful
+   * reword save — the parent should remove this row from its list. */
+  onRemoved?: (runResultId: string) => void;
+  /** Called when a triage action fails — parent should re-insert the row. */
+  onActionFailed?: (runResultId: string) => void;
+};
 
 type ActionKey = 'approve' | 'reverted' | 'accepted';
 
@@ -17,6 +35,12 @@ const ACTION_LABELS: Record<ActionKey, string> = {
   approve: COPY.inbox.actions.approve,
   reverted: COPY.inbox.actions.reword,
   accepted: COPY.inbox.actions.escalate,
+};
+
+const ERROR_TITLES: Record<ActionKey, string> = {
+  approve: COPY.inbox.triageErrors.approve,
+  reverted: COPY.inbox.triageErrors.reword,
+  accepted: COPY.inbox.triageErrors.escalate,
 };
 
 function scoreColorClass(score: number | null): string {
@@ -34,26 +58,60 @@ function FieldLabel({ children }: { children: ReactNode }) {
   );
 }
 
-export function DriftRow({ drift }: DriftRowProps) {
+export function DriftRow({
+  drift,
+  selected = false,
+  onRewordClick,
+  rewordMode = false,
+  onRemoved,
+  onActionFailed,
+}: DriftRowProps) {
   const [isPending, startTransition] = useTransition();
   const [pendingAction, setPendingAction] = useState<ActionKey | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  function handleAction(action: ActionKey) {
+  // Optimistic triage for approve / escalate: remove from list immediately,
+  // call the action, restore on failure.
+  function handleDirectAction(action: Exclude<ActionKey, 'reverted'>) {
     if (isPending) return;
     setError(null);
     setPendingAction(action);
+    onRemoved?.(drift.run_result_id);
     startTransition(async () => {
       const result = await triageRunResultAction(drift.run_result_id, action);
       setPendingAction(null);
       if (!result.ok) {
+        // Bring the row back and surface a toast.
+        onActionFailed?.(drift.run_result_id);
         setError(result.error);
+        toast.error(ERROR_TITLES[action], result.error);
       }
     });
   }
 
+  function handleRewordClick() {
+    if (isPending) return;
+    setError(null);
+    onRewordClick?.(drift.run_result_id);
+  }
+
+  function handleRewordSaved() {
+    onRemoved?.(drift.run_result_id);
+  }
+
+  function handleRewordCancel() {
+    onRewordClick?.(''); // parent interprets empty as "no row in reword mode"
+  }
+
+  const articleClass = [
+    'card space-y-4 transition-colors duration-100',
+    selected ? 'border-brand ring-1 ring-brand/40' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <article className="card space-y-4">
+    <article className={articleClass}>
       <div className="flex items-center gap-2 text-sm">
         <span aria-hidden className="inline-block h-2 w-2 rounded-full bg-warn" />
         <Link href={`/projects/${drift.project_id}`} className="text-text hover:underline">
@@ -104,8 +162,8 @@ export function DriftRow({ drift }: DriftRowProps) {
         <button
           type="button"
           className="btn-primary"
-          onClick={() => handleAction('approve')}
-          disabled={isPending}
+          onClick={() => handleDirectAction('approve')}
+          disabled={isPending || rewordMode}
           aria-busy={isPending && pendingAction === 'approve'}
         >
           {isPending && pendingAction === 'approve' ? 'Approving…' : ACTION_LABELS.approve}
@@ -113,22 +171,33 @@ export function DriftRow({ drift }: DriftRowProps) {
         <button
           type="button"
           className="btn-secondary"
-          onClick={() => handleAction('reverted')}
-          disabled={isPending}
-          aria-busy={isPending && pendingAction === 'reverted'}
+          onClick={handleRewordClick}
+          disabled={isPending || rewordMode}
+          aria-busy={false}
         >
-          {isPending && pendingAction === 'reverted' ? 'Saving…' : ACTION_LABELS.reverted}
+          {ACTION_LABELS.reverted}
         </button>
         <button
           type="button"
           className="btn-ghost"
-          onClick={() => handleAction('accepted')}
-          disabled={isPending}
+          onClick={() => handleDirectAction('accepted')}
+          disabled={isPending || rewordMode}
           aria-busy={isPending && pendingAction === 'accepted'}
         >
           {isPending && pendingAction === 'accepted' ? 'Saving…' : ACTION_LABELS.accepted}
         </button>
       </div>
+
+      {rewordMode ? (
+        <RewordEditor
+          runResultId={drift.run_result_id}
+          goldenQaId={drift.golden_qa_id}
+          initialQuestion={drift.question}
+          initialExpectedAnswer={drift.expected_answer}
+          onSaved={handleRewordSaved}
+          onCancel={handleRewordCancel}
+        />
+      ) : null}
     </article>
   );
 }

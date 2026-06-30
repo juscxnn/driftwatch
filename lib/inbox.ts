@@ -24,6 +24,7 @@ const PASS_THRESHOLD = 0.7;
 type JoinedRow = {
   id: string;
   run_id: string;
+  golden_qa_id: string;
   question: string;
   expected_answer: string;
   actual_answer: string | null;
@@ -43,9 +44,10 @@ type LastRunRow = {
 
 export async function loadInbox(
   orgId: string,
-  opts?: { limit?: number },
+  opts?: { limit?: number; offset?: number },
 ): Promise<InboxResponse> {
   const limit = clampLimit(opts?.limit ?? DEFAULT_LIMIT);
+  const offset = clampOffset(opts?.offset ?? 0);
   const sb = await createServerClient();
 
   const { data: projectsData } = await sb
@@ -62,16 +64,19 @@ export async function loadInbox(
   const projectCount = projects.length;
   const projectNameById = new Map(projects.map((p) => [p.id, p.name]));
 
-  const { data: driftRows, error: driftsErr } = await sb
+  let driftsQuery = sb
     .from('run_results')
     .select(
-      'id, run_id, question, expected_answer, actual_answer, judge_score, judge_reasoning, latency_ms, review_status, created_at, runs!inner(project_id, started_at)',
+      'id, run_id, golden_qa_id, question, expected_answer, actual_answer, judge_score, judge_reasoning, latency_ms, review_status, created_at, runs!inner(project_id, started_at)',
     )
     .eq('review_status', 'pending')
     .in('runs.project_id', allowedProjectIds)
     .or('passed.is.null,passed.eq.false')
-    .order('created_at', { ascending: false })
-    .limit(limit);
+    .order('created_at', { ascending: false });
+  if (offset > 0) driftsQuery = driftsQuery.range(offset, offset + limit - 1);
+  else driftsQuery = driftsQuery.limit(limit);
+
+  const { data: driftRows, error: driftsErr } = await driftsQuery;
   if (driftsErr) throw new Error(`loadInbox drifts: ${driftsErr.message}`);
 
   const drifts = ((driftRows ?? []) as unknown as JoinedRow[]).map(
@@ -81,6 +86,7 @@ export async function loadInbox(
       run_started_at: row.runs.started_at,
       project_id: row.runs.project_id,
       project_name: projectNameById.get(row.runs.project_id) ?? 'Unknown project',
+      golden_qa_id: row.golden_qa_id,
       question: row.question,
       expected_answer: row.expected_answer,
       actual_answer: row.actual_answer,
@@ -133,6 +139,11 @@ function emptyInbox(): InboxResponse {
 function clampLimit(n: number): number {
   if (!Number.isFinite(n) || n <= 0) return DEFAULT_LIMIT;
   return Math.min(Math.floor(n), MAX_LIMIT);
+}
+
+function clampOffset(n: number): number {
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  return Math.floor(n);
 }
 
 export const INBOX_THRESHOLD = PASS_THRESHOLD;

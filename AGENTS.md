@@ -5,10 +5,11 @@ filenames or generic Next.js/React knowledge.
 
 ## Stack at a glance
 
-- Next.js 15 App Router on Vercel (`app/` route groups: `(auth)`, `(dashboard)`, `api/`)
-- Supabase (Postgres + Auth + pgvector) — single migration at `supabase/migrations/0001_init.sql`
-- LLM adapter pattern — factory at `lib/llm/index.ts`, default `deepseek`
+- Next.js 15 App Router on Vercel (`app/` route groups: `(auth)`, `(dashboard)`, `api/`, `welcome/`)
+- Supabase (Postgres + Auth + pgvector) — migrations at `supabase/migrations/0001_init.sql`, `0002_org_members_policies.sql`, `0003_fix_org_members_recursion.sql`, `0004_org_llm_key.sql`
+- LLM adapter pattern — factory at `lib/llm/index.ts`, default `deepseek`, BYOK supported via `lib/encrypt.ts` (pgcrypto)
 - Cron endpoint `/api/cron/daily-runs` authenticated by bearer `CRON_SECRET`
+- Sidebar layout on `md+`, top bar on `<md`; Inter loaded via `next/font/google`
 
 ## Commands
 
@@ -18,10 +19,11 @@ filenames or generic Next.js/React knowledge.
 | Typecheck | `npm run typecheck` (`tsc --noEmit`) |
 | Lint | `npm run lint` — **prompts to configure ESLint on first run**, no `.eslintrc` exists yet |
 | Build | `npm run build` |
-| Test | `npm test` (vitest, runs `lib/**/*.test.ts` + `components/**/*.test.tsx` + `app/**/*.test.ts`) |
+| Test | `npm test` (vitest, runs `lib/**/*.test.ts` + `components/**/*.test.tsx` + `app/**/*.test.{ts,tsx}`) |
 | Test (watch) | `npm run test:watch` |
 | DB migrate | `npm run db:push` (runs `supabase db push`) |
 | Reset local DB | `npm run db:reset` |
+| Smoke test deploy | `APP_URL=… npm run smoke` (hits `/api/health` + a sample of routes) |
 
 **Vitest covers pure logic only** (`formatRelative`, `ScoreBar` via `renderToString`, `friendlyAuthError`). Do not mock Supabase — API route and data-layer tests are out of scope for v1. Verification of the wired-up app is `typecheck` → `test` → `build`.
 
@@ -102,9 +104,37 @@ Multi-org switching is out of scope (v1). The user's "active" org is the first `
 
 - **All user-facing copy** lives in `lib/copy.ts` as `COPY.*`. Don't inline strings in components.
 - **Types**: `lib/types.ts` (domain), `lib/db-types.ts` (branded `Uuid` etc.). No `any` / `as any` — repo grep should stay clean.
-- **Tailwind only**, no UI kit. Reuse the `.card`, `.btn-primary`, `.btn-secondary`, `.input`, `.label`, `.muted`, `.error-text` classes defined in `app/globals.css`.
-- **Server actions** live in `app/(auth)/actions.ts` (auth) and feature-local files (e.g. project mutations). Always return a `{ ok: true } | { ok: false; error }` discriminated union.
+- **Tailwind only**, no UI kit. Reuse the `.card`, `.btn-primary`, `.btn-secondary`, `.btn-ghost`, `.btn-danger`, `.input`, `.textarea`, `.label`, `.muted`, `.subtle`, `.error-text`, `.num` classes defined in `app/globals.css`.
+- **Server actions** live in `app/(auth)/actions.ts` (auth) and `lib/actions/org.ts` (org). Always return a `{ ok: true } | { ok: false; error }` discriminated union. Every action logs `[name] …` on entry / success / failure.
+- **Components** — when adding to `components/`, place in `components/<name>.tsx` and follow existing convention: small, single responsibility, typed props, tested with vitest if it has logic.
 - **Cron** has no user session — uses admin client exclusively.
+
+## Forms
+
+- Use the new `<Field>` component for label + helper + error (see `components/field.tsx`).
+- For destructive actions, always wrap in `<ConfirmDialog>` with `variant="danger"` and `requireTextMatch` when the trigger word matters (e.g. delete org requires typing the org name).
+- Toast on success and failure: use the global `toast.success(title, body?)` / `toast.error(title, body?)` helpers (or `useToast()` inside client components).
+
+## Auth + org scope
+
+- All API routes require `getSession()` from `lib/auth.ts` (throws `AuthError` on missing session/org).
+- Mutations to user-scoped tables use the SSR client; cross-org bootstrap (signup, settings) uses the admin client.
+- For per-org data, scope via `from('projects').select('id').eq('org_id', session.orgId)` then `.in('project_id', allowed)` on the target table. Use `.in()`, never `.eq()` with an array.
+
+## BYOK (LLM key)
+
+- Per-org key stored in `organizations.llm_key_encrypted` (text, base64), encrypted via `pgp_sym_encrypt(plaintext, ENCRYPTION_KEY)` from migration `0004`.
+- `lib/encrypt.ts` wraps encrypt/decrypt as server-side helpers (called via Supabase RPC `encrypt_secret` / `decrypt_secret`).
+- `lib/llm/index.ts`: `buildLLM({ apiKey?, provider? })` — explicit `apiKey` wins over env, explicit `provider` wins over env. Falls back to `deepseek` if both are unknown/missing.
+- `lib/rag/engine.ts`: `runProject` resolves the BYOK key once via `resolveOrgLlmApiKey()` and threads it through every judge call. If the org has no key and env has no key, throws a clear error at the top.
+
+## Routes
+
+- `/` — auth-aware: unauthed → redirect `/welcome`; authed + no org → OnboardingForm; authed + has org → inbox
+- `/welcome` — public marketing landing (Linear/Vercel aesthetic)
+- `/login`, `/signup`, `/callback` — auth
+- `/projects`, `/projects/[id]`, `/projects/new`, `/runs/[id]`, `/triage`, `/settings` — dashboard routes (sidebar-wrapped via `(dashboard)/layout.tsx`)
+- All pages that read cookies must export `dynamic = 'force-dynamic'` + `runtime = 'nodejs'`.
 
 ## Env vars
 

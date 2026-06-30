@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { DataTable } from '@/components/data-table';
 import { EmptyState } from '@/components/empty-state';
 import { Sources } from '@/lib/api';
 import { ApiClientError } from '@/lib/api';
@@ -29,13 +30,7 @@ export function SourcesTab({ projectId, items }: SourcesTabProps) {
           body={COPY.sources.empty.body}
         />
       ) : (
-        <div className="card overflow-hidden p-0">
-          <ul className="divide-y divide-border">
-            {items.map((item) => (
-              <SourceRow key={item.id} item={item} />
-            ))}
-          </ul>
-        </div>
+        <SourceList items={items} />
       )}
 
       <AddSourceForm projectId={projectId} />
@@ -43,7 +38,64 @@ export function SourcesTab({ projectId, items }: SourcesTabProps) {
   );
 }
 
-function SourceRow({ item }: { item: Source }) {
+function SourceList({ items }: { items: Source[] }) {
+  return (
+    <DataTable<Source>
+      rows={items}
+      rowKey={(s) => s.id}
+      defaultSort={{ key: 'title', direction: 'asc' }}
+      columns={[
+        {
+          key: 'title',
+          header: 'Title',
+          sortBy: (s) => (s.title ?? s.uri).toLowerCase(),
+          cell: (s) => (
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="rounded-md bg-surface-muted px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-text-muted">
+                  {s.kind}
+                </span>
+                <div className="font-medium text-text">{s.title ?? s.uri}</div>
+              </div>
+              <a
+                href={s.uri}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-1 block break-all text-sm text-brand hover:text-brand-hover hover:underline"
+              >
+                {s.uri}
+              </a>
+            </div>
+          ),
+        },
+        {
+          key: 'lastFetched',
+          header: COPY.sources.columns.lastFetched,
+          className: 'w-36',
+          cell: (s) => (
+            <span className="muted">{formatRelative(s.last_fetched_at)}</span>
+          ),
+        },
+        {
+          key: 'hash',
+          header: COPY.sources.columns.lastHash,
+          className: 'w-28',
+          cell: (s) => (
+            <span className="num">{truncateHash(s.last_hash)}</span>
+          ),
+        },
+        {
+          key: 'actions',
+          header: '',
+          className: 'w-32 text-right',
+          cell: (s) => <SourceRowActions item={s} />,
+        },
+      ]}
+    />
+  );
+}
+
+function SourceRowActions({ item }: { item: Source }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -74,57 +126,25 @@ function SourceRow({ item }: { item: Source }) {
   }
 
   return (
-    <li className="px-4 py-3">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="rounded-md bg-surface-muted px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-text-muted">
-              {item.kind}
-            </span>
-            <div className="font-medium text-text">
-              {item.title ?? item.uri}
-            </div>
-          </div>
-          <a
-            href={item.uri}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-1 block break-all text-sm text-brand hover:text-brand-hover hover:underline"
-          >
-            {item.uri}
-          </a>
-          <dl className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-muted">
-            <div>
-              <dt className="inline">{COPY.sources.columns.lastFetched}: </dt>
-              <dd className="inline">{formatRelative(item.last_fetched_at)}</dd>
-            </div>
-            <div>
-              <dt className="inline">{COPY.sources.columns.lastHash}: </dt>
-              <dd className="inline num">{truncateHash(item.last_hash)}</dd>
-            </div>
-          </dl>
-          {error ? <p className="error-text mt-2">{error}</p> : null}
-        </div>
-        <div className="shrink-0 flex flex-col items-end gap-2">
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={handleRefresh}
-            disabled={isPending}
-          >
-            {isPending ? COPY.sources.refreshing : COPY.sources.refresh}
-          </button>
-          <button
-            type="button"
-            className="text-sm font-medium text-danger hover:underline disabled:opacity-50"
-            onClick={handleDelete}
-            disabled={isPending}
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    </li>
+    <div className="flex flex-col items-end gap-1">
+      <button
+        type="button"
+        className="btn-secondary"
+        onClick={handleRefresh}
+        disabled={isPending}
+      >
+        {isPending ? COPY.sources.refreshing : COPY.sources.refresh}
+      </button>
+      <button
+        type="button"
+        className="text-sm font-medium text-danger hover:underline disabled:opacity-50"
+        onClick={handleDelete}
+        disabled={isPending}
+      >
+        Delete
+      </button>
+      {error ? <p className="error-text">{error}</p> : null}
+    </div>
   );
 }
 

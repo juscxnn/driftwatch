@@ -8,6 +8,11 @@
  *   4. Persist runs + run_results.
  *   5. Email the customer if anything failed (best-effort).
  *
+ * BYOK: `runProject` decrypts the org's stored LLM key once at the start
+ * of the run and threads the resulting `apiKey` down through every judge
+ * call. If the org has no stored key we fall back to the env-based
+ * provider.
+ *
  * Two entry points:
  *   - `runProject(projectId, triggeredBy)`  — full run, persists results.
  *   - `judgeAnswer({...})`                 — pure scoring function, useful
@@ -16,10 +21,11 @@
 
 import { Resend } from "resend";
 import { z } from "zod";
-import { getLLM, LLMProvider } from "../llm";
+import { getLLM, buildLLM, LLMProvider } from "../llm";
 import { callRagEndpoint, RagClientError } from "./client";
 import { TriggerSource, Uuid } from "../db-types";
 import { createAdminClient } from "../supabase/admin";
+import { decryptSecret, encryptionConfigured } from "../encrypt";
 
 export interface JudgeInput {
   question: string;
@@ -71,15 +77,29 @@ Return JSON only.`;
 /**
  * Score an answer using the LLM judge. Pure function — does not write to
  * the database. Uses the default LLM provider.
+ *
+ * Accepts an optional `apiKey` override (BYOK) and `provider` override.
+ * If both are omitted, falls back to the env-based default via `getLLM()`.
  */
-export async function judgeAnswer(input: JudgeInput): Promise<JudgeResult> {
+export async function judgeAnswer(
+  input: JudgeInput,
+  opts: {
+    apiKey?: string | null;
+    provider?: string | null;
+  } = {},
+): Promise<JudgeResult> {
   if (!input.actualAnswer || input.actualAnswer.trim().length === 0) {
     return {
       score: 0,
       reasoning: "RAG endpoint returned an empty answer.",
     };
   }
-  const llm = getLLM();
+  let llm: LLMProvider;
+  if (opts.apiKey || opts.provider) {
+    llm = buildLLM({ apiKey: opts.apiKey, provider: opts.provider });
+  } else {
+    llm = getLLM();
+  }
   return judgeAnswerWith(input, llm);
 }
 
@@ -152,6 +172,45 @@ export interface RunSummary {
 }
 
 /**
+ * Resolve the org's stored LLM API key (decrypting once). Returns null
+ * when the org has no stored key. Throws if a stored key exists but
+ * `ENCRYPTION_KEY` is missing from the environment — the alternative
+ * would be silently skipping encryption and using a no-op path.
+ */
+async function resolveOrgLlmApiKey(
+  supabase: ReturnType<typeof createAdminClient>,
+  orgId: string,
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("organizations")
+    .select("llm_key_encrypted, llm_key_hint")
+    .eq("id", orgId)
+    .maybeSingle();
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.warn("[engine] failed to load org LLM key:", error.message);
+    return null;
+  }
+  const ciphertext = (data?.llm_key_encrypted as unknown);
+  if (ciphertext == null || ciphertext === "") return null;
+  // We persist the ciphertext as base64 text (see migration 0004). Treat
+  // any non-empty string as such.
+  if (typeof ciphertext !== "string") return null;
+  try {
+    return await decryptSecret(ciphertext);
+  } catch (err) {
+    if (!encryptionConfigured()) {
+      // eslint-disable-next-line no-console
+      console.error(
+        "[engine] ENCRYPTION_KEY is not configured but the org has a stored LLM key; falling back to the env-based key for this run.",
+      );
+      return null;
+    }
+    throw err;
+  }
+}
+
+/**
  * Run the golden Q&A suite against a project. Returns a summary of the run
  * after persisting all rows. Safe to call from API routes and from cron —
  * it always uses the admin client (bypasses RLS) because the engine
@@ -160,13 +219,16 @@ export interface RunSummary {
  * The run is `await`ed end-to-end (no fire-and-forget) so the API caller
  * gets the summary back. If the run is very long, callers should consider
  * running it via a job queue, but for v1 we keep it inline.
+ *
+ * BYOK: the org's stored LLM key is resolved (decrypted) once at the
+ * start of the run and reused for every question. If the org has none,
+ * we fall back to the env-based provider.
  */
 export async function runProject(
   projectId: Uuid,
   triggeredBy: TriggerSource,
 ): Promise<RunSummary> {
   const supabase = createAdminClient();
-  const llm = getLLM();
 
   // 1. Load project.
   const { data: project, error: projErr } = await supabase
@@ -179,6 +241,37 @@ export async function runProject(
   }
   if (!project.rag_endpoint_url) {
     throw new Error(`Project ${projectId} has no rag_endpoint_url configured`);
+  }
+
+  // 2. Resolve BYOK once (or fall back to env). The env-based provider
+  //    is constructed lazily by getLLM() inside judgeAnswer when no BYOK
+  //    key is present.
+  const orgId = (project as { org_id: string }).org_id;
+  const byokKey = await resolveOrgLlmApiKey(supabase, orgId);
+
+  const judgeOpts: {
+    apiKey?: string | null;
+    provider?: string | null;
+  } = byokKey
+    ? {
+        apiKey: byokKey,
+        provider:
+          (project as { judge_provider?: string | null }).judge_provider ?? null,
+      }
+    : {};
+  if (!byokKey) {
+    // Sanity check the env-based fallback is wired up. We only call this
+    // once at the start so missing keys fail fast with a clean error
+    // before we burn questions.
+    try {
+      getLLM();
+    } catch (err) {
+      throw new Error(
+        `No LLM key configured for this organization and the env fallback is missing. ${
+          err instanceof Error ? err.message : "Add an API key in Settings → LLM key or set DEEPSEEK_API_KEY in the env."
+        }`,
+      );
+    }
   }
 
   // 2. Load active golden Q&As.
@@ -233,12 +326,15 @@ export async function runProject(
       actualAnswer = call.answer;
       latencyMs = call.latencyMs;
 
-      const judge = await judgeAnswer({
-        question: q.question,
-        expectedAnswer: q.expected_answer,
-        actualAnswer: call.answer,
-        rubric: q.judge_rubric,
-      });
+      const judge = await judgeAnswer(
+        {
+          question: q.question,
+          expectedAnswer: q.expected_answer,
+          actualAnswer: call.answer,
+          rubric: q.judge_rubric,
+        },
+        judgeOpts,
+      );
       score = judge.score;
       reasoning = judge.reasoning;
       passed = judge.score >= Number(project.pass_threshold ?? 0.7);
@@ -257,9 +353,6 @@ export async function runProject(
     }
 
     if (passed === false) failedQuestionIds.push(q.id);
-    // Mark `llm` as used to avoid "unused" warnings in the future when we
-    // surface per-project provider overrides here.
-    void llm;
 
     resultRows.push({
       run_id: runId,

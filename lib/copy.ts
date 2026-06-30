@@ -3,15 +3,70 @@
 
 export const COPY = {
   brand: 'RAG Drift Watcher',
+  brandShort: 'Driftwatch',
   tagline: 'Watches your RAG and screams when it starts lying.',
 
   nav: {
-    home: 'Home',
+    home: 'Inbox',
     projects: 'Projects',
     triage: 'Triage',
+    settings: 'Settings',
     signOut: 'Sign out',
+    signingOut: 'Signing out…',
     signIn: 'Sign in',
     getStarted: 'Get started',
+  },
+
+  marketing: {
+    heroEyebrow: 'Watches your RAG in production',
+    heroTitle: 'Get an email when your RAG starts lying.',
+    heroSubtitle:
+      'Point Driftwatch at any RAG endpoint, add a handful of golden Q&As, and we will run them on a schedule and flag drift before your customers do.',
+    heroPrimaryCta: 'Start watching free',
+    heroSecondaryCta: 'See a live demo',
+    howItWorksTitle: 'How it works',
+    howItWorksSubtitle:
+      'Three steps. Five minutes. You will get the first drift email before lunch.',
+    steps: {
+      one: {
+        title: 'Point at your RAG',
+        body: 'Paste your RAG endpoint URL and an optional bearer token. Driftwatch sends the same JSON shape your RAG already returns.',
+      },
+      two: {
+        title: 'Add golden Q&As',
+        body: 'Drop in the questions your RAG should answer correctly. Optionally tag them by topic so the judge weighs the right criteria.',
+      },
+      three: {
+        title: 'Get alerts',
+        body: 'We run the suite on a schedule and email you when an answer drifts. Triage, accept, or reword from a friendly console.',
+      },
+    },
+    demoTitle: 'No RAG yet? Try the demo inbox.',
+    demoBody:
+      'Sign up, seed sample data in one click, and explore a triage console that already has drift in it.',
+    demoCta: 'Open sample inbox',
+    finalCtaTitle: 'Stop finding out from your customers.',
+    finalCtaBody:
+      'Driftwatch emails you the moment an answer drifts from your golden set. Set it up once, sleep better.',
+    finalCtaButton: 'Start watching',
+    nav: {
+      signIn: 'Sign in',
+      getStarted: 'Get started',
+    },
+    footer: {
+      copyright: (year: number) =>
+        `© ${year} Driftwatch. Built so RAG owners sleep better.`,
+      product: 'Product',
+      productInbox: 'Inbox',
+      productTriage: 'Triage',
+      productPricing: 'Pricing',
+      company: 'Company',
+      companyAbout: 'About',
+      companyContact: 'Contact',
+      legal: 'Legal',
+      legalTerms: 'Terms',
+      legalPrivacy: 'Privacy',
+    },
   },
 
   auth: {
@@ -85,6 +140,53 @@ export const COPY = {
     reasoningLabel: 'Why the judge scored this',
     scoreLabel: 'Score',
     latencyLabel: 'Latency',
+    filters: {
+      all: 'All',
+      lowScore: 'Drifted <0.5',
+      midScore: 'Drifted 0.5–0.7',
+      byProject: 'By project',
+      allProjects: 'All projects',
+      noMatchesTitle: 'No drifts match your filter.',
+      noMatchesBody: 'Try clearing the filter to see everything.',
+      clearFilter: 'Clear filter',
+    },
+    loadMore: 'Load more',
+    loadingMore: 'Loading…',
+    reword: {
+      title: 'Reword the question',
+      questionLabel: 'Question',
+      expectedLabel: 'Expected answer',
+      save: 'Save & mark reworded',
+      saving: 'Saving…',
+      cancel: 'Cancel',
+      savedTitle: 'Question reworded',
+      savedBody: 'Marked this drift as reverted.',
+      errorTitle: 'Could not save',
+    },
+    triageErrors: {
+      approve: 'Could not approve',
+      reword: 'Could not save reword',
+      escalate: 'Could not escalate',
+    },
+    shortcuts: {
+      helpTitle: 'Keyboard shortcuts',
+      helpIntro: 'Move fast through the inbox without touching the mouse.',
+      openHelp: 'Show keyboard shortcuts',
+      groups: {
+        nav: 'Navigate',
+        actions: 'Triage',
+      },
+      keys: {
+        j: 'Move selection down',
+        k: 'Move selection up',
+        a: 'Approve selected',
+        r: 'Reword Q on selected',
+        e: 'Escalate selected',
+        question: 'Show this help',
+        escape: 'Close this help',
+      },
+      note: 'Shortcuts pause while you type in an input or textarea.',
+    },
   },
 
   projects: {
@@ -250,6 +352,44 @@ export const COPY = {
     failedToSave: 'We could not save that. Please try again.',
     failedToDelete: 'We could not delete that. Please try again.',
     failedToTrigger: 'We could not trigger that run. Please try again.',
+  },
+
+  confirmDialogs: {
+    deleteOrg: {
+      title: 'Delete organization?',
+      description:
+        'This permanently deletes your organization, all projects, and every golden Q&A. This action cannot be undone.',
+      confirm: 'Delete organization',
+      cancel: 'Cancel',
+      typeToConfirmPrompt: 'Type your organization name to confirm:',
+    },
+    deleteProject: {
+      title: 'Delete project?',
+      description:
+        'This permanently deletes this project, its golden Q&A, sources, and run history. This action cannot be undone.',
+      confirm: 'Delete project',
+      cancel: 'Cancel',
+      typeToConfirmPrompt: 'Type the project name to confirm:',
+    },
+    deleteGoldenQ: {
+      title: 'Delete question?',
+      description:
+        'This permanently removes this question from your golden Q&A suite. This action cannot be undone.',
+      confirm: 'Delete question',
+      cancel: 'Cancel',
+    },
+    deleteSource: {
+      title: 'Delete source?',
+      description:
+        'This stops watching this source. Existing runs that referenced it are kept.',
+      confirm: 'Delete source',
+      cancel: 'Cancel',
+    },
+    generic: {
+      title: 'Are you sure?',
+      confirm: 'Confirm',
+      cancel: 'Cancel',
+    },
   },
 } as const;
 

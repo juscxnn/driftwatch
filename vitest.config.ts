@@ -6,7 +6,13 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: 'node',
-    include: ['lib/**/*.test.ts', 'components/**/*.test.tsx', 'app/**/*.test.ts'],
+    include: [
+      'lib/**/*.test.ts',
+      'lib/**/*.test.tsx',
+      'components/**/*.test.tsx',
+      'app/**/*.test.ts',
+      'app/**/*.test.tsx',
+    ],
     exclude: ['node_modules', '.next', 'dist'],
   },
   resolve: {

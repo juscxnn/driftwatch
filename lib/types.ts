@@ -108,6 +108,7 @@ export type InboxDrift = {
   run_started_at: ISODateString;
   project_id: string;
   project_name: string;
+  golden_qa_id: string;
   question: string;
   expected_answer: string;
   actual_answer: string | null;

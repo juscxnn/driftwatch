@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { DataTable } from '@/components/data-table';
 import { EmptyState } from '@/components/empty-state';
 import { StatusBadge } from '@/components/status-badge';
 import { Runs } from '@/lib/api';
@@ -34,43 +35,64 @@ export function RunsTab({ projectId, items }: RunsTabProps) {
           body={COPY.runs.empty.body}
         />
       ) : (
-        <div className="card overflow-hidden p-0">
-          <table className="w-full text-sm">
-            <thead className="bg-surface-muted text-left text-text-muted">
-              <tr>
-                <th className="px-4 py-2 font-medium">{COPY.runs.columns.started}</th>
-                <th className="px-4 py-2 font-medium">{COPY.runs.columns.status}</th>
-                <th className="px-4 py-2 font-medium">{COPY.runs.columns.total}</th>
-                <th className="px-4 py-2 font-medium">{COPY.runs.columns.passed}</th>
-                <th className="px-4 py-2 font-medium">{COPY.runs.columns.failed}</th>
-                <th className="px-4 py-2 font-medium">{COPY.runs.columns.triggeredBy}</th>
-                <th className="px-4 py-2 font-medium sr-only">{COPY.projects.columnAction}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((run) => (
-                <tr key={run.id} className="border-t border-border">
-                  <td className="px-4 py-3 text-text-muted">{formatDate(run.started_at)}</td>
-                  <td className="px-4 py-3">
-                    <StatusBadge kind="run" value={run.status} />
-                  </td>
-                  <td className="px-4 py-3">{run.total}</td>
-                  <td className="px-4 py-3 text-success">{run.passed}</td>
-                  <td className="px-4 py-3 text-danger">{run.failed}</td>
-                  <td className="px-4 py-3 text-text-muted">{run.triggered_by}</td>
-                  <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/runs/${run.id}`}
-                      className="text-brand hover:text-brand-hover hover:underline"
-                    >
-                      {COPY.projects.rowAction}
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable<Run>
+          rows={items}
+          rowKey={(r) => r.id}
+          defaultSort={{ key: 'started', direction: 'desc' }}
+          columns={[
+            {
+              key: 'started',
+              header: COPY.runs.columns.started,
+              sortBy: (r) => r.started_at,
+              cell: (r) => (
+                <span className="text-text-muted">{formatDate(r.started_at)}</span>
+              ),
+            },
+            {
+              key: 'status',
+              header: COPY.runs.columns.status,
+              cell: (r) => <StatusBadge kind="run" value={r.status} />,
+            },
+            {
+              key: 'total',
+              header: COPY.runs.columns.total,
+              className: 'w-16',
+              cell: (r) => <span>{r.total}</span>,
+            },
+            {
+              key: 'passed',
+              header: COPY.runs.columns.passed,
+              className: 'w-16',
+              cell: (r) => <span className="text-success">{r.passed}</span>,
+            },
+            {
+              key: 'failed',
+              header: COPY.runs.columns.failed,
+              className: 'w-16',
+              cell: (r) => <span className="text-danger">{r.failed}</span>,
+            },
+            {
+              key: 'triggeredBy',
+              header: COPY.runs.columns.triggeredBy,
+              cell: (r) => (
+                <span className="text-text-muted">{r.triggered_by}</span>
+              ),
+            },
+            {
+              key: 'action',
+              header: COPY.projects.columnAction,
+              className: 'w-24 text-right',
+              cell: (r) => (
+                <Link
+                  href={`/runs/${r.id}`}
+                  className="text-brand hover:text-brand-hover hover:underline"
+                >
+                  {COPY.projects.rowAction}
+                </Link>
+              ),
+            },
+          ]}
+        />
       )}
 
       {items.length > 0 ? (

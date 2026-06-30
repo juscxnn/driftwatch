@@ -2,41 +2,19 @@ import Link from 'next/link';
 import { getSupabaseServer, getSession } from '@/lib/supabase/server';
 import { loadInbox } from '@/lib/inbox';
 import { OnboardingForm } from './onboarding-form';
-import { DriftRow } from './inbox/drift-row';
+import { InboxList } from './inbox/inbox-list';
 import { SeedSampleDataButton } from './inbox/seed-sample-data-button';
 import { EmptyState } from '@/components/empty-state';
 import { COPY } from '@/lib/copy';
 import { formatRelative } from '@/lib/format';
+import { ArrowRightIcon } from '@/components/icons';
 
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
-
-function HealthyDot() {
-  return (
-    <span aria-hidden className="inline-block h-2 w-2 rounded-full bg-brand" />
-  );
-}
-
-function ArrowRight() {
-  return (
-    <svg
-      aria-hidden
-      width="14"
-      height="14"
-      viewBox="0 0 14 14"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M3 7h8" />
-      <path d="M8 4l3 3-3 3" />
-    </svg>
-  );
-}
-
-export default async function DashboardHome() {
+/**
+ * Renders the dashboard inbox (or onboarding if the user has no org).
+ * Pulled out of `app/(dashboard)/page.tsx` so it can be reused from the
+ * root `/` page in `app/page.tsx`. Server component.
+ */
+export async function InboxHome() {
   const session = await getSession();
   if (!session) return null;
 
@@ -51,6 +29,11 @@ export default async function DashboardHome() {
   if (!orgId) return <OnboardingForm />;
 
   const inbox = await loadInbox(orgId);
+  const projects = await sb
+    .from('projects')
+    .select('id, name')
+    .eq('org_id', orgId)
+    .order('name', { ascending: true });
 
   return (
     <div className="space-y-8">
@@ -80,7 +63,7 @@ export default async function DashboardHome() {
             <div className="flex flex-wrap items-center justify-center gap-3">
               <Link href="/projects" className="btn-primary">
                 {COPY.inbox.noProjectsCta}
-                <ArrowRight />
+                <ArrowRightIcon />
               </Link>
               <SeedSampleDataButton />
             </div>
@@ -88,18 +71,18 @@ export default async function DashboardHome() {
         />
       ) : inbox.drifts.length === 0 ? (
         <EmptyState
-          icon={<HealthyDot />}
+          icon={
+            <span aria-hidden className="inline-block h-2 w-2 rounded-full bg-brand" />
+          }
           title={COPY.inbox.emptyTitle}
           body={COPY.inbox.emptyBody}
         />
       ) : (
-        <ul className="space-y-3">
-          {inbox.drifts.map((d) => (
-            <li key={d.run_result_id}>
-              <DriftRow drift={d} />
-            </li>
-          ))}
-        </ul>
+        <InboxList
+          initialDrifts={inbox.drifts}
+          totalPending={inbox.total_pending}
+          projects={projects.data ?? []}
+        />
       )}
     </div>
   );

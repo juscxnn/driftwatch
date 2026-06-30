@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { DataTable } from '@/components/data-table';
 import { ScoreBar } from '@/components/score-bar';
 import { StatusBadge } from '@/components/status-badge';
 import { RunResults } from '@/lib/api';
@@ -23,7 +24,6 @@ export function RunResultsList({ initial }: Props) {
 
   function triage(id: string, review_status: Exclude<ReviewStatus, 'pending'>) {
     setError(null);
-    // Optimistic update
     setResults((rs) =>
       rs.map((r) =>
         r.id === id
@@ -40,7 +40,6 @@ export function RunResultsList({ initial }: Props) {
         await RunResults.triage(id, { review_status });
         router.refresh();
       } catch (err) {
-        // Revert
         setResults(initial);
         setError(err instanceof ApiClientError ? err.message : COPY.errors.failedToSave);
       }
@@ -56,67 +55,101 @@ export function RunResultsList({ initial }: Props) {
   }
 
   return (
-    <div className="card overflow-hidden p-0">
-      {error ? <p className="error-text border-b border-border px-4 py-2">{error}</p> : null}
-      <ul className="divide-y divide-border">
-        {results.map((r) => (
-          <li key={r.id} className="px-4 py-4">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <StatusBadge kind="passed" value={r.passed} />
-                  <StatusBadge kind="review" value={r.review_status} />
-                  <span className="muted text-xs">
-                    {formatLatency(r.latency_ms)}
-                  </span>
-                </div>
-                <div className="mt-2 font-medium text-text">{r.question}</div>
-                <div className="mt-2 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-                  <Field label="Expected" value={r.expected_answer} />
-                  <Field label="Actual" value={r.actual_answer ?? '—'} />
-                </div>
-                {r.judge_reasoning ? (
-                  <p className="mt-2 text-sm italic text-text-muted">
-                    “{r.judge_reasoning}”
-                  </p>
-                ) : null}
-              </div>
-              <div className="shrink-0 flex flex-col items-end gap-2">
-                <ScoreBar
-                  score={r.judge_score}
-                  reasoning={r.judge_reasoning}
-                />
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    onClick={() => triage(r.id, 'approved')}
-                    disabled={isPending || r.review_status !== 'pending'}
-                  >
-                    {COPY.runDetail.actions.approve}
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    onClick={() => triage(r.id, 'reverted')}
-                    disabled={isPending || r.review_status !== 'pending'}
-                  >
-                    {COPY.runDetail.actions.revert}
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    onClick={() => triage(r.id, 'accepted')}
-                    disabled={isPending || r.review_status !== 'pending'}
-                  >
-                    {COPY.runDetail.actions.accept}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+    <div className="space-y-3">
+      {error ? (
+        <p className="error-text rounded-md border border-danger bg-danger-muted px-3 py-2 text-sm">
+          {error}
+        </p>
+      ) : null}
+      <DataTable<RunResult>
+        rows={results}
+        rowKey={(r) => r.id}
+        defaultSort={{ key: 'score', direction: 'desc' }}
+        columns={[
+          {
+            key: 'score',
+            header: COPY.runDetail.columns.question,
+            sortBy: (r) => r.judge_score ?? Number.NEGATIVE_INFINITY,
+            cell: (r) => <ResultCell result={r} />,
+          },
+          {
+            key: 'actions',
+            header: 'Review',
+            className: 'w-56',
+            cell: (r) => (
+              <ResultActions
+                result={r}
+                isPending={isPending}
+                onTriage={(status) => triage(r.id, status)}
+              />
+            ),
+          },
+        ]}
+      />
+    </div>
+  );
+}
+
+function ResultCell({ result: r }: { result: RunResult }) {
+  return (
+    <div className="min-w-0 space-y-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <StatusBadge kind="passed" value={r.passed} />
+        <StatusBadge kind="review" value={r.review_status} />
+        <span className="muted text-xs">{formatLatency(r.latency_ms)}</span>
+      </div>
+      <div className="font-medium text-text">{r.question}</div>
+      <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+        <Field label="Expected" value={r.expected_answer} />
+        <Field label="Actual" value={r.actual_answer ?? '—'} />
+      </div>
+      {r.judge_reasoning ? (
+        <p className="text-sm italic text-text-muted">
+          &ldquo;{r.judge_reasoning}&rdquo;
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function ResultActions({
+  result,
+  isPending,
+  onTriage,
+}: {
+  result: RunResult;
+  isPending: boolean;
+  onTriage: (status: Exclude<ReviewStatus, 'pending'>) => void;
+}) {
+  return (
+    <div className="flex flex-col items-end gap-2">
+      <ScoreBar score={result.judge_score} reasoning={result.judge_reasoning} />
+      <div className="flex flex-wrap justify-end gap-2">
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => onTriage('approved')}
+          disabled={isPending || result.review_status !== 'pending'}
+        >
+          {COPY.runDetail.actions.approve}
+        </button>
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => onTriage('reverted')}
+          disabled={isPending || result.review_status !== 'pending'}
+        >
+          {COPY.runDetail.actions.revert}
+        </button>
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => onTriage('accepted')}
+          disabled={isPending || result.review_status !== 'pending'}
+        >
+          {COPY.runDetail.actions.accept}
+        </button>
+      </div>
     </div>
   );
 }

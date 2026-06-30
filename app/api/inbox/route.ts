@@ -1,9 +1,11 @@
 /**
  * /api/inbox — pending non-passing run results for the active org.
  *
- * GET /api/inbox?limit=N
+ * GET /api/inbox?limit=N&offset=N
  *
- * `limit` is optional (default 50, max 100). Returns `InboxResponse`.
+ * `limit` is optional (default 50, max 100).
+ * `offset` is optional (default 0) — used for "Load more" pagination.
+ * Returns `InboxResponse`.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -19,7 +21,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const session = await getSession();
     const url = new URL(req.url);
     const limit = parseLimit(url.searchParams.get("limit"));
-    const inbox = await loadInbox(session.orgId, { limit });
+    const offset = parseLimit(url.searchParams.get("offset"));
+    const inbox = await loadInbox(session.orgId, { limit, offset });
     return ok(inbox);
   });
 }
